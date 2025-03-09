@@ -11,7 +11,7 @@ class StoreHotelRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; 
+        return true;
     }
 
     /**
@@ -19,14 +19,25 @@ class StoreHotelRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
             'nombre' => 'required|string|max:255',
             'direccion' => 'required|string|max:255',
             'ciudad' => 'required|string|max:100',
-            'nit' => 'required|string|unique:hoteles,nit',
+            'nit' => 'required|string|unique:hotels,nit',
             'numero_habitaciones' => 'required|integer|min:1',
+            'habitaciones_configuradas' => 'nullable|array',
+            'habitaciones_configuradas.*.room_type_id' => 'required|exists:room_types,id',
+            'habitaciones_configuradas.*.accommodation_id' => 'required|exists:accommodations,id',
+            'habitaciones_configuradas.*.cantidad' => 'required|integer|min:1',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'habitaciones_configuradas' => $this->habitaciones_configuradas,
+        ]);
     }
 }

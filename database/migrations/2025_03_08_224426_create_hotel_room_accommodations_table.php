@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('hotel_room_accommodations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('hotel_id')->constrained('hoteles'); // Relación con Hotel
-            $table->foreignId('room_type_id')->constrained('room_types'); // Relación con RoomType
-            $table->foreignId('accommodation_id')->constrained('accommodations'); // Relación con Accommodation
+            $table->foreignId('hotel_id')->constrained('hotels')->nullable(); // Relación con Hotel
+            $table->foreignId('room_type_id')->constrained('room_types')->nullable(); // Relación con RoomType
+            $table->foreignId('accommodation_id')->constrained('accommodations')->nullable(); // Relación con Accommodation
             $table->integer('cantidad')->unsigned(); // Cantidad de habitaciones
             $table->timestamps();
         });

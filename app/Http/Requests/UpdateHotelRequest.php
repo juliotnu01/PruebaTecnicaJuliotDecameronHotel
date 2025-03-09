@@ -25,8 +25,12 @@ class UpdateHotelRequest extends FormRequest
             'nombre' => 'sometimes|required|string|max:255',
             'direccion' => 'sometimes|required|string|max:255',
             'ciudad' => 'sometimes|required|string|max:100',
-            'nit' => 'sometimes|required|string|unique:hoteles,nit,' . $this->route('hotel')->id,
+            'nit' => 'sometimes|required|string|unique:hotels,nit,' . $this->route('hotel')->id,
             'numero_habitaciones' => 'sometimes|required|integer|min:1',
+            'habitaciones_configuradas' => 'nullable|array',
+            'habitaciones_configuradas.*.room_type_id' => 'required|exists:room_types,id',
+            'habitaciones_configuradas.*.accommodation_id' => 'required|exists:accommodations,id',
+            'habitaciones_configuradas.*.cantidad' => 'required|integer|min:1',
         ];
     }
 }

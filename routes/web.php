@@ -16,7 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware('web')->group(function () {
     // Rutas para Hoteles
-    Route::resource('hoteles', HotelController::class);
+    Route::resource('hotel', HotelController::class);
 
     // Rutas para Tipos de Habitación
     Route::resource('tipos-habitacion', RoomTypeController::class);

@@ -13,9 +13,8 @@ class RoomType extends Model
         return $this->hasMany(Accommodation::class);
     }
 
-    public function hoteles()
+    public function hotelRoomAccommodations()
     {
-        return $this->belongsToMany(Hotel::class, 'hotel_room_accommodations')
-            ->withPivot('accommodation_id', 'cantidad');
+        return $this->hasMany(HotelRoomAccommodation::class);
     }
 }

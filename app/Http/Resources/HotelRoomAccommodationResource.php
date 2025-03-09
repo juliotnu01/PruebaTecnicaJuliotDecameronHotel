@@ -17,14 +17,10 @@ class HotelRoomAccommodationResource extends JsonResource
         return [
             'id' => $this->id,
             'hotel_id' => $this->hotel_id,
-            'hotel' => $this->hotel ? $this->hotel->nombre : null,
-            'room_type_id' => $this->room_type_id,
-            'room_type' => $this->roomType ? $this->roomType->nombre : null,
-            'accommodation_id' => $this->accommodation_id,
-            'accommodation' => $this->accommodation ? $this->accommodation->nombre : null,
+            'hotel_nombre' => $this->hotel ? $this->hotel->nombre : null, // Nombre del hotel asociado
+            'room_type' => new RoomTypeResource($this->whenLoaded('roomType')), // Usa el resource de RoomType
+            'accommodation' => new AccommodationResource($this->whenLoaded('accommodation')), // Usa el resource de Accommodation
             'cantidad' => $this->cantidad,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }

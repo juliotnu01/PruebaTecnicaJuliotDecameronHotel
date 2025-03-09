@@ -19,8 +19,6 @@ class AccommodationResource extends JsonResource
             'nombre' => $this->nombre,
             'room_type_id' => $this->room_type_id,
             'room_type' => $this->roomType ? $this->roomType->nombre : null,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }
