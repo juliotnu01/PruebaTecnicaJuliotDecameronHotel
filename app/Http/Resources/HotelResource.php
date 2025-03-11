@@ -14,7 +14,7 @@ class HotelResource extends JsonResource
             'ciudad' => $this->ciudad,
             'nit' => $this->nit,
             'numero_habitaciones' => $this->numero_habitaciones,
-            'habitaciones_configuradas' => HotelRoomAccommodationResource::collection($this->habitacionesConfiguradas),
+            'habitaciones_configuradas' => HotelRoomAccommodationResource::collection($this->whenLoaded('habitacionesConfiguradas')),
         ];
     }
 }

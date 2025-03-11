@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreHotelRequest;
 use App\Http\Requests\UpdateHotelRequest;
+use App\Http\Resources\AccommodationResource;
 use App\Models\Hotel;
 use App\Http\Resources\HotelResource;
 use App\Http\Resources\HotelCollection;
@@ -53,10 +54,10 @@ class HotelController extends Controller
                 'nit',
                 'numero_habitaciones',
             ])->all();
-    
+
             // Crear el hotel
             $hotel = Hotel::create($hotelData);
-    
+
             // Guardar las habitaciones configuradas
             if ($request->has('habitaciones_configuradas')) {
                 foreach ($request->input('habitaciones_configuradas') as $config) {
@@ -67,44 +68,61 @@ class HotelController extends Controller
                     ]);
                 }
             }
-    
+
             return redirect()->route('hotel.index')->with('success', 'Hotel creado exitosamente.');
         } catch (\Throwable $th) {
             // Redirigir con errores
-            return redirect()->back()->withErrors(['error' => 'Ocurrió un error al crear el hotel.'. $th->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un error al crear el hotel.' . $th->getMessage()])->withInput();
         }
     }
 
     public function edit(Hotel $hotel)
     {
+        $accommodations = Accommodation::all();
         $roomTypes = RoomType::all();
         $hotel->load('habitacionesConfiguradas.roomType', 'habitacionesConfiguradas.accommodation');
+        // dd(collect( [
+        //     'hotel' => new HotelResource($hotel),
+        //     'roomTypes' => collect(RoomTypeResource::collection($roomTypes))->all(),
+        //     'accommodations' => AccommodationResource::collection($accommodations),
+        // ]));
         return Inertia::render('Hotel/Edit', [
             'hotel' => new HotelResource($hotel),
             'roomTypes' => RoomTypeResource::collection($roomTypes),
+            'accommodations' => AccommodationResource::collection($accommodations),
         ]);
     }
 
     public function update(UpdateHotelRequest $request, Hotel $hotel)
     {
-        // Actualizar el hotel
-        $hotel->update($request->validated());
+        try {
+            // Obtener los datos validados
+            $validated = $request->validated();
 
-        // Eliminar configuraciones anteriores
-        $hotel->habitacionesConfiguradas()->delete();
+            // Excluir 'habitaciones_configuradas' de los datos para actualizar el hotel
+            unset($validated['habitaciones_configuradas']);
 
-        // Guardar las nuevas configuraciones
-        if ($request->has('habitaciones_configuradas')) {
-            foreach ($request->input('habitaciones_configuradas') as $config) {
-                $hotel->habitacionesConfiguradas()->create([
-                    'room_type_id' => $config['room_type_id'],
-                    'accommodation_id' => $config['accommodation_id'],
-                    'cantidad' => $config['cantidad'],
-                ]);
+            // Actualizar los datos básicos del hotel
+            $hotel->update($validated);
+
+            // Eliminar las habitaciones configuradas existentes
+            $hotel->habitacionesConfiguradas()->delete();
+
+            // Guardar las nuevas habitaciones configuradas
+            if ($request->has('habitaciones_configuradas')) {
+                foreach ($request->input('habitaciones_configuradas') as $config) {
+                    $hotel->habitacionesConfiguradas()->create([
+                        'room_type_id' => $config['room_type_id'],
+                        'accommodation_id' => $config['accommodation_id'],
+                        'cantidad' => $config['cantidad'],
+                    ]);
+                }
             }
-        }
 
-        return redirect()->route('hotel.index')->with('success', 'Hotel actualizado exitosamente.');
+            return redirect()->route('hotel.index')->with('success', 'Hotel actualizado exitosamente.');
+        } catch (\Throwable $th) {
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un error al actualizar el hotel.' . $th->getMessage()])->withInput();
+        }
     }
 
     public function destroy(Hotel $hotel)

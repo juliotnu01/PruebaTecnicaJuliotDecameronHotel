@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidRoomAccommodation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateHotelRequest extends FormRequest
@@ -22,15 +23,16 @@ class UpdateHotelRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => 'sometimes|required|string|max:255',
-            'direccion' => 'sometimes|required|string|max:255',
-            'ciudad' => 'sometimes|required|string|max:100',
-            'nit' => 'sometimes|required|string|unique:hotels,nit,' . $this->route('hotel')->id,
-            'numero_habitaciones' => 'sometimes|required|integer|min:1',
+            'nombre' => 'required|string|max:255',
+            'direccion' => 'required|string|max:255',
+            'ciudad' => 'required|string|max:100',
+            'nit' => 'required|string|unique:hotels,nit,' . $this->hotel->id,
+            'numero_habitaciones' => 'required|integer|min:1',
             'habitaciones_configuradas' => 'nullable|array',
             'habitaciones_configuradas.*.room_type_id' => 'required|exists:room_types,id',
             'habitaciones_configuradas.*.accommodation_id' => 'required|exists:accommodations,id',
             'habitaciones_configuradas.*.cantidad' => 'required|integer|min:1',
+            'habitaciones_configuradas.*' => new ValidRoomAccommodation(),
         ];
     }
 }

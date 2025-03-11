@@ -5,7 +5,6 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import InputField from '@/components/InputField';
 import { toast } from 'react-toastify'; // Importar toast
-import 'react-toastify/dist/ReactToastify.css';
 
 // Definir tipos para las props
 interface RoomType {
