@@ -2,11 +2,9 @@ import React from 'react';
 
 const HotelCard = ({ hotel }: any) => {
     return (
-        <div
-            className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border"
-        >
-            <div className="p-4">
-                <h3 className="font-semibold">{hotel.nombre}</h3>
+        <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border flex flex-col">
+            <div className="p-4 flex-grow">
+                <h3 className="font-semibold text-lg">{hotel.nombre}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                     {hotel.ciudad}, {hotel.direccion}
                 </p>
@@ -29,16 +27,16 @@ const HotelCard = ({ hotel }: any) => {
                         )}
                     </ul>
                 </div>
+            </div>
 
-                {/* Botón de Edición */}
-                <div className="mt-4">
-                    <a
-                        href={`/hotel/${hotel.id}/edit`}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition-colors text-sm"
-                    >
-                        Editar
-                    </a>
-                </div>
+            {/* Botón de Edición */}
+            <div className="p-4 bg-gray-100 dark:bg-gray-800 flex justify-end mt-auto">
+                <a
+                    href={`/hotel/${hotel.id}/edit`}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition-colors text-sm"
+                >
+                    Editar
+                </a>
             </div>
         </div>
     );
