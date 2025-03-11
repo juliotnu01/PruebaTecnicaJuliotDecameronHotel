@@ -10,6 +10,7 @@ use App\Http\Resources\HotelResource;
 use App\Http\Resources\HotelCollection;
 use App\Http\Resources\RoomTypeResource;
 use App\Models\Accommodation;
+use App\Models\HotelRoomAccommodation;
 use App\Models\RoomType;
 use Inertia\Inertia;
 
@@ -96,19 +97,10 @@ class HotelController extends Controller
     public function update(UpdateHotelRequest $request, Hotel $hotel)
     {
         try {
-            // Obtener los datos validados
             $validated = $request->validated();
-
-            // Excluir 'habitaciones_configuradas' de los datos para actualizar el hotel
             unset($validated['habitaciones_configuradas']);
-
-            // Actualizar los datos básicos del hotel
             $hotel->update($validated);
-
-            // Eliminar las habitaciones configuradas existentes
             $hotel->habitacionesConfiguradas()->delete();
-
-            // Guardar las nuevas habitaciones configuradas
             if ($request->has('habitaciones_configuradas')) {
                 foreach ($request->input('habitaciones_configuradas') as $config) {
                     $hotel->habitacionesConfiguradas()->create([
@@ -118,16 +110,31 @@ class HotelController extends Controller
                     ]);
                 }
             }
-
             return redirect()->route('hotel.index')->with('success', 'Hotel actualizado exitosamente.');
         } catch (\Throwable $th) {
             return redirect()->back()->withErrors(['error' => 'Ocurrió un error al actualizar el hotel.' . $th->getMessage()])->withInput();
         }
     }
 
+
     public function destroy(Hotel $hotel)
     {
-        $hotel->delete();
-        return redirect()->route('hoteles.index')->with('success', 'Hotel eliminado exitosamente.');
+        try {
+            $hotel->delete();
+            return to_route('hotel.index')->with('success', 'Hotel eliminado exitosamente.');
+        } catch (\Throwable $th) {
+            return back()->withErrors(['error' => 'Ocurrió un error al eliminar el hotel: ' . $th->getMessage()]);
+        }
+    }
+
+    public function destroyRoomConfig(HotelRoomAccommodation $roomConfig)
+    {
+        try {
+            $roomConfig->delete();
+            return to_route('hotel.edit', ['hotel' => $roomConfig->hotel_id])
+                ->with('success', 'Habitación configurada eliminada exitosamente.');
+        } catch (\Throwable $th) {
+            return back()->withErrors(['error' => 'Ocurrió un error al eliminar la habitación configurada: ' . $th->getMessage()]);
+        }
     }
 }

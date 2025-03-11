@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react'; // Importar router para eliminar registros
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { toast } from 'react-toastify'; // Importar toast
-
+import 'react-toastify/dist/ReactToastify.css';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,8 +22,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
-
-
     const { data, setData, put, processing, errors } = useForm({
         nombre: hotel.data.nombre,
         direccion: hotel.data.direccion,
@@ -31,7 +29,6 @@ export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
         nit: hotel.data.nit,
         numero_habitaciones: String(hotel.data.numero_habitaciones),
         habitaciones_configuradas: hotel.data.habitaciones_configuradas.map((room: any) => ({
-
             id: room.id,
             room_type_id: room.room_type_id,
             accommodation_id: room.accommodation_id,
@@ -41,8 +38,6 @@ export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
 
     // Estado local para manejar las habitaciones configuradas
     const [rooms, setRooms] = useState(data.habitaciones_configuradas);
-
-
 
     useEffect(() => {
         // Sincronizar el estado local con los datos del formulario
@@ -62,10 +57,9 @@ export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // put(`/hotel/${hotel.data.id}`);
         put(route('hotel.update', { hotel: hotel.data.id }), {
             onSuccess: () => {
-                toast.success('Hotel creado exitosamente.', {
+                toast.success('Hotel actualizado exitosamente.', {
                     position: 'top-right',
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -85,6 +79,62 @@ export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
                 });
             },
         });
+    };
+
+    const handleDeleteHotel = (id: number) => {
+        if (confirm('¿Estás seguro de que deseas eliminar este hotel?')) {
+            router.delete(route('hotel.destroy', { hotel: id }), {
+                onSuccess: () => {
+                    toast.success('Hotel eliminado exitosamente.', {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                    });
+                },
+                onError: (responseErrors: Record<string, string>) => {
+                    Object.keys(responseErrors).forEach((key) => {
+                        toast.error(`${key}: ${responseErrors[key]}`, {
+                            position: 'top-right',
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                        });
+                    });
+                },
+            });
+        }
+    };
+
+    const handleDeleteRoomConfig = (id: number) => {
+        if (confirm('¿Estás seguro de que deseas eliminar esta habitación configurada?')) {
+            router.delete(route('hotel.room.config.destroy', { roomConfig: id }), {
+                onSuccess: () => {
+                    // Actualizar el estado local eliminando la habitación configurada
+                    setRooms((prevRooms: any) => prevRooms.filter((room: any) => room.id !== id));
+                    toast.success('Habitación configurada eliminada exitosamente.', {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                    });
+                },
+                onError: (responseErrors: Record<string, string>) => {
+                    Object.keys(responseErrors).forEach((key) => {
+                        toast.error(`${key}: ${responseErrors[key]}`, {
+                            position: 'top-right',
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                        });
+                    });
+                },
+            });
+        }
     };
 
     return (
@@ -178,7 +228,8 @@ export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
                             Agregar Habitación
                         </button>
                         {rooms.map((room: any, index: any) => (
-                            <div key={index} className="mt-4 space-y-2">
+                            <div key={index} className="mt-4 space-y-2 relative">
+                                {/* Select para Tipo de Habitación */}
                                 <select
                                     value={String(room.room_type_id)} // Convertir a string para coincidir con el value del option
                                     onChange={(e) => handleRoomChange(index, 'room_type_id', e.target.value)}
@@ -198,6 +249,7 @@ export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
                                     )}
                                 </select>
 
+                                {/* Select para Acomodación */}
                                 <select
                                     value={String(room.accommodation_id)} // Convertir a string para coincidir con el value del option
                                     onChange={(e) => handleRoomChange(index, 'accommodation_id', e.target.value)}
@@ -225,11 +277,32 @@ export default function HotelEdit({ hotel, roomTypes, accommodations }: any) {
                                     placeholder="Cantidad"
                                     className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                                 />
+
+                                {/* Botón para Eliminar Habitación Configurada */}
+                                {room.id && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDeleteRoomConfig(room.id)}
+                                        className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors"
+                                    >
+                                        Eliminar
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-end space-x-4">
+                        {/* Botón para Eliminar el Hotel */}
+                        <button
+                            type="button"
+                            onClick={() => handleDeleteHotel(hotel.data.id)}
+                            className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        >
+                            Eliminar Hotel
+                        </button>
+
+                        {/* Botón para Actualizar el Hotel */}
                         <button
                             type="submit"
                             className="bg-yellow-500 text-white px-6 py-2 rounded-md hover:bg-yellow-600 transition-colors"

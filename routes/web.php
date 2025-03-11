@@ -15,17 +15,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware('web')->group(function () {
-    // Rutas para Hoteles
     Route::resource('hotel', HotelController::class);
-
-    // Rutas para Tipos de Habitación
     Route::resource('tipos-habitacion', RoomTypeController::class);
-
-    // Rutas para Acomodaciones
     Route::resource('acomodaciones', AccommodationController::class);
-
-    // Rutas para Asignaciones de Habitaciones
     Route::resource('asignaciones', HotelRoomAccommodationController::class);
+    Route::delete('/hotel-room-config/{roomConfig}', [HotelController::class, 'destroyRoomConfig'])->name('hotel.room.config.destroy');
 });
 
 require __DIR__ . '/settings.php';
