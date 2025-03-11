@@ -222,4 +222,3 @@ El sistema validará automáticamente que no se superen los límites de habitaci
 ### Limitaciones
 
 - No se requiere autenticación para usuarios administrativos.
-- Los catálogos (ciudades, tipos de habitación, acomodaciones) son estáticos.
