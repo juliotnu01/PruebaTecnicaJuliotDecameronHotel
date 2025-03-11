@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('room_types', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique(); // Tipos únicos
+            $table->string('nombre')->unique()->nullable(); // Tipos únicos
             $table->timestamps();
         });
     }

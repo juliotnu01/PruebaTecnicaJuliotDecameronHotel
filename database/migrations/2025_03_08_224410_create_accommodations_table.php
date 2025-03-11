@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('accommodations', function (Blueprint $table) {
             $table->id();
             $table->string('nombre')->unique(); // Acomodaciones únicas
-            $table->foreignId('room_type_id')->constrained('room_types'); // Relación con RoomType
             $table->timestamps();
         });
     }

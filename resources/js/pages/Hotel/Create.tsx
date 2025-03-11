@@ -4,6 +4,24 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import InputField from '@/components/InputField';
+import { toast } from 'react-toastify'; // Importar toast
+import 'react-toastify/dist/ReactToastify.css';
+
+// Definir tipos para las props
+interface RoomType {
+    id: number;
+    nombre: string;
+}
+
+interface Accommodation {
+    id: number;
+    nombre: string;
+}
+
+interface HotelCreateProps {
+    roomTypes: RoomType[];
+    accommodations: Accommodation[];
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,8 +38,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function HotelCreate() {
-    const { data, setData, post, processing, errors } = useForm({
+export default function HotelCreate({ roomTypes, accommodations }: HotelCreateProps) {
+    // Definir tipos para el formulario
+    interface FormData {
+        nombre: string;
+        direccion: string;
+        ciudad: string;
+        nit: string;
+        numero_habitaciones: string;
+        habitaciones_configuradas: Array<{
+            room_type_id: string;
+            accommodation_id: string;
+            cantidad: string;
+        }>;
+    }
+
+    const { data, setData, post, processing, errors } = useForm<FormData>({
         nombre: '',
         direccion: '',
         ciudad: '',
@@ -30,30 +62,57 @@ export default function HotelCreate() {
         habitaciones_configuradas: [],
     });
 
-    const [rooms, setRooms]: any = useState([]);
+    // Definir tipos para el estado de las habitaciones configuradas
+    interface RoomConfig {
+        room_type_id: string;
+        accommodation_id: string;
+        cantidad: string;
+    }
+
+    const [rooms, setRooms] = useState<RoomConfig[]>([]);
 
     const handleAddRoom = () => {
         setRooms([...rooms, { room_type_id: '', accommodation_id: '', cantidad: '' }]);
     };
 
-    const handleRoomChange = (index: any, field: any, value: any) => {
-        const updatedRooms: any = [...rooms];
+    const handleRoomChange = (index: number, field: keyof RoomConfig, value: string) => {
+        const updatedRooms = [...rooms];
         updatedRooms[index][field] = value;
         setRooms(updatedRooms);
         setData('habitaciones_configuradas', updatedRooms);
     };
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
     
-        const formData: any = {
+        const formData = {
             ...data,
             habitaciones_configuradas: data.habitaciones_configuradas,
         };
     
-        post(route('hotel.store'), formData);
+        post(route('hotel.store'), {
+            onSuccess: () => {
+                toast.success('Hotel creado exitosamente.', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                });
+            },
+            onError: (responseErrors: Record<string, string>) => {
+                Object.keys(responseErrors).forEach((key) => {
+                    toast.error(`${key}: ${responseErrors[key]}`, {
+                        position: 'top-right',
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                    });
+                });
+            },
+        });
     };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Crear Hotel" />
@@ -64,32 +123,32 @@ export default function HotelCreate() {
                         <InputField
                             label="Nombre"
                             value={data.nombre}
-                            onChange={(e: any) => setData('nombre', e.target.value)}
+                            onChange={(e) => setData('nombre', e.target.value)}
                             error={errors.nombre}
                         />
                         <InputField
                             label="Dirección"
                             value={data.direccion}
-                            onChange={(e: any) => setData('direccion', e.target.value)}
+                            onChange={(e) => setData('direccion', e.target.value)}
                             error={errors.direccion}
                         />
                         <InputField
                             label="Ciudad"
                             value={data.ciudad}
-                            onChange={(e: any) => setData('ciudad', e.target.value)}
+                            onChange={(e) => setData('ciudad', e.target.value)}
                             error={errors.ciudad}
                         />
                         <InputField
                             label="NIT"
                             value={data.nit}
-                            onChange={(e: any) => setData('nit', e.target.value)}
+                            onChange={(e) => setData('nit', e.target.value)}
                             error={errors.nit}
                         />
                         <InputField
                             label="Número de Habitaciones"
                             type="number"
                             value={data.numero_habitaciones}
-                            onChange={(e: any) => setData('numero_habitaciones', e.target.value)}
+                            onChange={(e) => setData('numero_habitaciones', e.target.value)}
                             error={errors.numero_habitaciones}
                         />
                     </div>
@@ -104,7 +163,7 @@ export default function HotelCreate() {
                         >
                             Agregar Habitación
                         </button>
-                        {rooms.map((room: any, index: any) => (
+                        {rooms.map((room, index) => (
                             <div key={index} className="mt-4 space-y-2">
                                 <select
                                     value={room.room_type_id}
@@ -112,9 +171,17 @@ export default function HotelCreate() {
                                     className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                                 >
                                     <option value="">Selecciona un tipo de habitación</option>
-                                    <option value="1">Estándar</option>
-                                    <option value="2">Junior</option>
-                                    <option value="3">Suite</option>
+                                    {roomTypes?.length > 0 ? (
+                                        roomTypes.map((roomType) => (
+                                            <option key={roomType.id} value={roomType.id}>
+                                                {roomType.nombre}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="" disabled>
+                                            No hay tipos de habitación disponibles
+                                        </option>
+                                    )}
                                 </select>
                                 <select
                                     value={room.accommodation_id}
@@ -122,9 +189,17 @@ export default function HotelCreate() {
                                     className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                                 >
                                     <option value="">Selecciona una acomodación</option>
-                                    <option value="1">Sencilla</option>
-                                    <option value="2">Doble</option>
-                                    <option value="3">Triple</option>
+                                    {accommodations?.length > 0 ? (
+                                        accommodations.map((accommodation) => (
+                                            <option key={accommodation.id} value={accommodation.id}>
+                                                {accommodation.nombre}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="" disabled>
+                                            No hay acomodaciones disponibles
+                                        </option>
+                                    )}
                                 </select>
                                 <input
                                     type="number"
@@ -147,7 +222,7 @@ export default function HotelCreate() {
                         </button>
                     </div>
                 </form>
-            </div>
-        </AppLayout>
+            </div >
+        </AppLayout >
     );
 }

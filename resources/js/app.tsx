@@ -4,6 +4,8 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
+import { ToastContainer } from 'react-toastify'; // Importar ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Importar estilos de react-toastify
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -13,12 +15,18 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        // Envolver la aplicación con un fragmento que incluya ToastContainer
+        root.render(
+            <>
+                <App {...props} />
+                <ToastContainer /> 
+            </>
+        );
     },
     progress: {
         color: '#4B5563',
     },
 });
 
-// This will set light / dark mode on load...
+// Esto establecerá el tema claro/oscuro al cargar...
 initializeTheme();
