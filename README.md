@@ -217,7 +217,6 @@ El sistema validará automáticamente que no se superen los límites de habitaci
 ### Buenas Prácticas
 
 - El código sigue los principios SOLID.
-- Las clases y métodos están documentados.
 - Se utilizan patrones de diseño como Repository para mejorar la escalabilidad.
 
 ### Limitaciones
